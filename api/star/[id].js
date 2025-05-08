@@ -3,7 +3,7 @@ const axios = require('axios');
 module.exports = async (req, res) => {
     try {
         const path = req.url.replace('/api/mac1/', '');
-        const streamUrl = `http://xtv.ooo:8080/live/387546/200900/${path}`;
+        const streamUrl = `http://starshare.st/live/42166/42166/${path}`;
 
         const response = await axios.get(streamUrl, {
             headers: {
