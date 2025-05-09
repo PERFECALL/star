@@ -3,7 +3,7 @@ import axios from 'axios';
 
 export async function GET(request, { params }) {
   try {
-    const { path } = params;
+    const path = params.path.join('/');
     const streamUrl = `http://starshare.st/live/42166/42166/${path}`;
 
     const response = await axios.get(streamUrl, {
