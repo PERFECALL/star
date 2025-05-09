@@ -16,18 +16,21 @@ module.exports = async (req, res) => {
 
             let playlist = response.data;
 
-            // Get base path to rewrite .ts links
-            const basePath = path.substring(0, path.lastIndexOf('/') + 1);
+            // Rewrite .ts segment URLs
+            playlist = playlist.replace(/^(?!#)(.*\.ts)$/gm, segment => {
+                const basePath = path.substring(0, path.lastIndexOf('/') + 1);
+                return `/api/star/${basePath}${segment.trim()}`;
+            });
 
-            // Rewrite each .ts segment to go through this same API
-            playlist = playlist.replace(/^(?!#)(.*\.ts)$/gm, segment =>
-                `/api/star/${basePath}${segment.trim()}`
-            );
+            // Rewrite nested .m3u8 playlist URLs
+            playlist = playlist.replace(/^(?!#)(.*\.m3u8)$/gm, nested => {
+                const basePath = path.substring(0, path.lastIndexOf('/') + 1);
+                return `/api/star/${basePath}${nested.trim()}`;
+            });
 
             res.setHeader('Content-Type', 'application/vnd.apple.mpegurl');
             res.status(200).send(playlist);
         } else {
-            // For .ts files, proxy the segment
             const response = await axios.get(streamUrl, {
                 headers: {
                     'User-Agent': 'VLC/3.0.11 LibVLC/3.0.11',
@@ -36,7 +39,7 @@ module.exports = async (req, res) => {
                 responseType: 'stream',
             });
 
-            res.setHeader('Content-Type', response.headers['content-type'] || 'video/MP2T');
+            res.setHeader('Content-Type', response.headers['content-type'] || 'application/octet-stream');
             response.data.pipe(res);
         }
     } catch (error) {
